@@ -13,10 +13,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from bangazon_api.views.product_view import ProductView
 from django.contrib import admin
 from django.conf.urls import url
 from django.urls import path, include
-from rest_framework import permissions
+from rest_framework import permissions, routers
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
@@ -31,7 +32,11 @@ schema_view = get_schema_view(
     permission_classes=[permissions.AllowAny],
 )
 
+router = routers.DefaultRouter(trailing_slash=False)
+router.register(r'products', ProductView, 'product')
+
 urlpatterns = [
+    path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('api/', include('bangazon_api.urls')),
     path('reports/', include('bangazon_reports.urls')),
