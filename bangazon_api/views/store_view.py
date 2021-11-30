@@ -1,10 +1,11 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from bangazon_api.models import Store
+from bangazon_api.models import Store, Favorite
 from bangazon_api.serializers import StoreSerializer, MessageSerializer, AddStoreSerializer
 
 
@@ -99,3 +100,26 @@ class StoreView(ViewSet):
             return Response({'message': ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
         except Store.DoesNotExist as ex:
             return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
+    @action(methods=['POST', 'DELETE'], detail=True)
+    def favorite(self, request, pk=None):
+        customer = request.auth.user
+        store = Store.objects.get(pk=pk)
+
+        if request.method == "POST":
+            try:
+                Favorite.objects.create(
+                    customer=customer,
+                    store=store
+                )
+
+                return Response({'message': 'store favorited'}, status=status.HTTP_201_CREATED)
+            except:
+                return Response({'message': "error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        elif request.method == "DELETE":
+            try:
+                favorite = Favorite.objects.get(customer=customer, store=store)
+                favorite.delete()
+                return Response({'message': "unfavorited store"}, status=status.HTTP_204_NO_CONTENT)
+            except:
+                return Response({'message': "error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
