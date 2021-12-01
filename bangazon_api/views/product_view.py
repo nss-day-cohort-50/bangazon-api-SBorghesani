@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from bangazon_api.helpers import STATE_NAMES
-from bangazon_api.models import Product, Store, Category, Order, Rating, Recommendation
+from bangazon_api.models import Product, Store, Category, Order, Rating, Recommendation, Like
 from bangazon_api.serializers import (
     ProductSerializer, CreateProductSerializer, MessageSerializer,
     AddProductRatingSerializer, AddRemoveRecommendationSerializer)
@@ -223,6 +223,42 @@ class ProductView(ViewSet):
             ),
         }
     )
+
+    @action(methods=['POST', 'DELETE', 'GET'], detail=True)
+    def like(self, request, pk=None):
+        customer = request.auth.user
+        product = Product.objects.get(pk=pk)
+
+        if request.method == 'POST':
+            try: 
+                Like.objects.create(
+                customer=customer,
+                product=product
+                )
+                return Response({'message': 'product liked'}, status=status.HTTP_201_CREATED)
+            except:
+                return Response({'message': "error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        elif request.method == "DELETE":
+            try:
+                like = Like.objects.get(customer=customer, product=product)
+                like.delete()
+                return Response({'message': "unliked product"}, status=status.HTTP_204_NO_CONTENT)
+            except:
+                return Response({'message': "error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    @action(methods=['GET'], detail=False)
+    def liked(self, request):
+        customer = request.auth.user
+        liked_products = []
+        likes = Like.objects.all().filter(customer=customer)
+        for like in likes:
+            liked_products.append(Product.objects.get(pk=like.product.id))
+        
+        serializer = ProductSerializer(liked_products, many=True)
+        return Response(serializer.data)
+
+
     @action(methods=['post'], detail=True)
     def add_to_order(self, request, pk):
         """Add a product to the current users open order"""
