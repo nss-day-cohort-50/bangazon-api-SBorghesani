@@ -44,7 +44,15 @@ class OrderTests(APITestCase):
         response = self.client.delete(f'/api/orders/{self.order1.id}')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
+    # def test_add_item_current_order(self):
+    #     product = Product.objects.get(pk=1)
+    #     self.order1.products.add(product)
+
+    #     response = self.client.post(f'api/products/1/add_to_order')
+    #     self.assertEqual(self.order1.completed_on, None)
+    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     # TODO: Complete Order test
+
     def test_complete_order(self):
         order = self.order1
         order.save()
@@ -57,10 +65,3 @@ class OrderTests(APITestCase):
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
     
-    def add_item_current_order(self):
-        product=Product.objects.get(pk=1)
-        self.order1.products.add(product)
-
-        response = self.client.post(f'api/products/{product.id}/add_to_order')
-        self.assertEqual(response.data['completed_on'], "NULL")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)

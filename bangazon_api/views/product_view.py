@@ -93,7 +93,7 @@ class ProductView(ViewSet):
                 schema=MessageSerializer()
             )
         })
-    def delete(self, request, pk):
+    def destroy(self, request, pk):
         """Delete a product"""
         try:
             product = Product.objects.get(pk=pk, store__user=request.auth.user)
