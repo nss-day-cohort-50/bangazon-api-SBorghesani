@@ -7,7 +7,7 @@ from rest_framework.authtoken.models import Token
 from django.core.management import call_command
 from django.contrib.auth.models import User
 from bangazon_api.helpers import STATE_NAMES
-from bangazon_api.models import Category
+from bangazon_api.models import Category, Store
 from bangazon_api.models.product import Product
 
 
@@ -66,6 +66,30 @@ class ProductTests(APITestCase):
 
         product_updated = Product.objects.get(pk=product.id)
         self.assertEqual(product_updated.description, data['description'])
+
+    def test_delete_product(self):
+        store = Store.objects.get(pk=1)
+        category = Category.objects.first()
+        product = Product()
+        product.name = "testProduct"
+        product.price = 245
+        product.store = store
+        product.description = "testProduct"
+        product.quantity = 2
+        product.location = "testProduct"
+        product.image_path = "null"
+        product.category = category
+
+        product.save()
+
+        url = f'/api/products/{product.id}'
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
 
     def test_get_all_products(self):
         """

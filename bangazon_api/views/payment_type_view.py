@@ -35,6 +35,7 @@ class PaymentTypeView(ViewSet):
             )
         }
     )
+
     def create(self, request):
         """Create a payment type for the current user"""
         try:
