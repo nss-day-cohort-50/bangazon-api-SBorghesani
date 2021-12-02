@@ -46,11 +46,13 @@ class OrderTests(APITestCase):
 
     # TODO: Complete Order test
     def test_complete_order(self):
-        order = self.order2
+        order = self.order1
         order.save()
         
         url = f"/api/orders/{order.id}/complete"
-        data = {"paymentTypeId": 2}
+        data = {
+            "paymentTypeId": 1
+        }
         
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
